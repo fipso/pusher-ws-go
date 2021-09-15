@@ -3,7 +3,6 @@ package pusher
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -641,65 +640,6 @@ func TestClientListen(t *testing.T) {
 		go client.listen()
 
 		wg.Wait()
-	})
-}
-
-func TestClientGenerateConnURL(t *testing.T) {
-	t.Run("defaults", func(t *testing.T) {
-		wantAppKey := "foo"
-		client := &Client{}
-		gotURL := client.generateConnURL(wantAppKey)
-		if !strings.Contains(gotURL, secureScheme) {
-			t.Errorf("Expected connection URL to have secure scheme, got %q", gotURL)
-		}
-		if !strings.Contains(gotURL, fmt.Sprint(securePort)) {
-			t.Errorf("Expected connection URL to have secure port, got %q", gotURL)
-		}
-		if !strings.Contains(gotURL, defaultHost) {
-			t.Errorf("Expected connection URL to have default host, got %q", gotURL)
-		}
-		if !strings.Contains(gotURL, wantAppKey) {
-			t.Errorf("Expected connection URL to have app key, got %q", gotURL)
-		}
-	})
-
-	t.Run("custom", func(t *testing.T) {
-		wantAppKey := "foo"
-		client := &Client{
-			Insecure: true,
-			Cluster:  "bar",
-		}
-		gotURL := client.generateConnURL(wantAppKey)
-		if !strings.Contains(gotURL, insecureScheme) {
-			t.Errorf("Expected connection URL to have insecure scheme, got %q", gotURL)
-		}
-		if !strings.Contains(gotURL, fmt.Sprint(insecurePort)) {
-			t.Errorf("Expected connection URL to have insecure port, got %q", gotURL)
-		}
-		if !strings.Contains(gotURL, "pusher.com") {
-			t.Errorf("Expected connection URL to have pusher.com, got %q", gotURL)
-		}
-		if !strings.Contains(gotURL, client.Cluster) {
-			t.Errorf("Expected connection URL to have custom cluster, got %q", gotURL)
-		}
-		if !strings.Contains(gotURL, wantAppKey) {
-			t.Errorf("Expected connection URL to have app key, got %q", gotURL)
-		}
-	})
-
-	t.Run("override", func(t *testing.T) {
-		client := &Client{
-			overrideHost: "foo.bar",
-			overridePort: 1234,
-		}
-
-		gotURL := client.generateConnURL("")
-		if !strings.Contains(gotURL, client.overrideHost) {
-			t.Errorf("Expected connection URL to have override host, got %q", gotURL)
-		}
-		if !strings.Contains(gotURL, fmt.Sprint(client.overridePort)) {
-			t.Errorf("Expected connection URL to have override port, got %q", gotURL)
-		}
 	})
 }
 

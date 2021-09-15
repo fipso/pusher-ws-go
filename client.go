@@ -27,14 +27,11 @@ const (
 
 	localOrigin = "http://localhost/"
 
-	connURLFormat     = "%s://%s:%d/app/%s?protocol=%s"
-	secureScheme      = "wss"
-	securePort        = 443
-	insecureScheme    = "ws"
-	insecurePort      = 80
-	defaultHost       = "ws.pusherapp.com"
-	clusterHostFormat = "ws-%s.pusher.com"
-	protocolVersion   = "7"
+	secureScheme    = "wss"
+	securePort      = 443
+	insecureScheme  = "ws"
+	insecurePort    = 80
+	protocolVersion = "7"
 )
 
 type boundEventChans map[chan Event]struct{}
@@ -102,33 +99,13 @@ func UnmarshalDataString(data json.RawMessage, dest interface{}) error {
 	return json.Unmarshal([]byte(dataStr), dest)
 }
 
-func (c *Client) generateConnURL(appKey string) string {
-	scheme, port := secureScheme, securePort
-	if c.Insecure {
-		scheme, port = insecureScheme, insecurePort
-	}
-	if c.overridePort != 0 {
-		port = c.overridePort
-	}
-
-	host := defaultHost
-	if c.Cluster != "" {
-		host = fmt.Sprintf(clusterHostFormat, c.Cluster)
-	}
-	if c.overrideHost != "" {
-		host = c.overrideHost
-	}
-
-	return fmt.Sprintf(connURLFormat, scheme, host, port, appKey, protocolVersion)
-}
-
 // Connect establishes a connection to the Pusher app specified by appKey.
-func (c *Client) Connect(appKey string) error {
+func (c *Client) Connect(wsURL string) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	var err error
-	c.ws, err = websocket.Dial(c.generateConnURL(appKey), "", localOrigin)
+	c.ws, err = websocket.Dial(wsURL, "", localOrigin)
 	if err != nil {
 		return err
 	}
